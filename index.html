@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fizika test</title>
+    <style>
+        /* Umumiy stil */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            position: relative;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+            transition: background-color 0.3s ease;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        /* Testni boshlash tugmasi */
+        #startBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 50px;
+        }
+
+        #startBtn:hover {
+            background-color: #45a049;
+        }
+
+        /* Dumaloq tugma (dark mode switch) */
+        #darkModeBtn {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            background-color: rgba(0, 0, 0, 0.3); /* Shaffof holat */
+            color: white;
+            border-radius: 50%;
+            padding: 20px;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        #darkModeBtn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Dark Mode Stiker */
+        #darkModeSticker {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            background-color: #ff9800;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        #darkModeSticker:hover {
+            background-color: #e65100;
+        }
+
+        /* Animatsiyalar va test dizayni */
+        #testContainer {
+            display: none;
+        }
+
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .options {
+            margin-bottom: 30px;
+            text-align: left; /* Variantlarni chap tomonga surish */
+        }
+
+        .options label {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            transition: background-color 0.3s ease;
+        }
+
+        .options label:hover {
+            background-color: #d0d0d0;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        #finishBtn, #restartBtn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #finishBtn:hover, #restartBtn:hover {
+            background-color: #45a049;
+        }
+
+        #restartBtn {
+            background-color: #FF9800;
+        }
+
+        #restartBtn:hover {
+            background-color: #F57C00;
+        }
+
+        #result {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 30px;
+            color: #333;
+        }
+
+        /* Stiker va animatsiya */
+        .start-page {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1495958280615-d9b0c8e9e1b0') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(5px);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <div class="start-page">
+        <h1>Testni Boshlash uchun Tugmani Bosing</h1>
+        <button id="startBtn" onclick="startTest()">Testni Boshlash</button>
+    </div>
+
+    <div class="container" id="testContainer">
+        <h1>Fizika test</h1>
+        <div id="questionsContainer"></div>
+        <button id="finishBtn" onclick="finishTest()">Testni Yakunlash</button>
+        <div id="result"></div>
+        <button id="restartBtn" onclick="restartTest()">Qaytadan Boshlash</button>
+    </div>
+
+    <!-- Dumaloq tugma (dark mode) -->
+    <button id="darkModeBtn" onclick="toggleDarkMode()">🌙</button>
+
+    <!-- Dark mode sticker -->
+    <div id="darkModeSticker" onclick="toggleDarkMode()">🌙 Dark Mode</div>
+
+    <script>
+        let darkMode = false;
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode', darkMode);
+            const sticker = document.getElementById('darkModeSticker');
+            sticker.textContent = darkMode ? ' Light Mode' : '🌙 Dark Mode';
+        }
+
+        // Test boshlash, tugmalar va animatsiyalar
+        const fileContent = `Normal sharoitda bir atomli gaz molekulasi aylanma harakatining o‘rtacha kinetik energiyasini hisoblang.
+5,7·10-21J
+7,5·10-21J
+#0 J
+7·1011J
++++++
+To‘lqinning tarqalish yo‘nalishida joylashgan va tebranishlar fazalar farqi 2π/5 ga teng bo‘lgan ikki nuqtalar orasidagi masofa 2 m bo‘lsa, to‘lqin uzunligini (m) toping? uzunligi
+12/5
+21/5
+1/5
+#10
++++++
+Qanday jarayonlarda gazning bajargan  ishi nolga teng?
+#Izoxorik             
+adiabatik.         
+izotermik           
+izobarik.
++++++
+10 sekundda 40m/s tezlikka erishgan “Matiz” avtomobilining tezlanishi qancha?
+2 m/s<sup>2</sup>
+8 m/s<sup>2</sup>
+#4 m/s<sup>2</sup>
+20 m/s<sup>2</sup>
++++++
+30m/s tezlikda borayotgan “Damas”  4m/s<sup>2</sup> , tezlanish bilan 10 sekund  qancha yo‘l yuradi.
+#500 m
+400 m
+50 m
+5000 m
++++++
+Maydonning ikki nuqtasi orasiga 3·10<sup>-6</sup>C zaryadni ko‘shirishda 7,5·10<sup>-3</sup>J ish bajarildi. Nuqtalar orasidagi kuchlanish qanday bo‘ladi.
+25 V;
+0,4·10<sup>-3</sup>V;
+2,5·10<sup>9</sup>V;
+#2500 V;
++++++
+Elektromаgnit induktsiya hodisаsini Fаrаdey nechanchi yili kаshf qilgаn
+1820yili         
+#1831 yili        
+1931yili        
+1920  yili
++++++
+Agar argon gazining harorati 37 <sup>0</sup> S bo‘lsa, argon atomining o‘rtacha kinetik energiyasi nimaga teng bo‘ladi?
+6·10<sup>-12</sup> J
+≈0,6·10<sup>-3</sup> J
+#≈6,4·10<sup>-21</sup> J
+6·10<sup>3</sup> J
++++++
+Nuqta x o‘qi bo‘ylab x=0,07cos(60πt+π), m qonun bo‘yicha tebranmoqda. Tebranishning maksimal tezligini toping.
+#4.2π
+0.07
+60 π
+7
++++++
+Kosmik kema tomonidan 2 MGs chastotada radioto‘lqin uzatilayotgan bo‘lsa, uning to‘lqin uzunligini aniqlang.
+5 m
+10 m
+#150 m
+20 m
++++++
+Kosmik kema tomonidan 200 MGs chastotada radioto‘lqin uzatilayotgan bo‘lsa, uning to‘lqin uzunligini aniqlang.
+5 m
+#1.5 m
+15 m
+2 m
++++++
+Potentsial farqi nima=
+#birlik musbat zaryadni zanjir bo’ylab ko’chirishda elektr kuchlarning bajargan ishi.=
+birlik musbat zaryadni zanjir bo’ylab ko’chirishda bajarilgan ish.=
+birlik musbat zaryadni zanjir bo’ylab ko’chirishda begona kuchlanishning bajargan ishi.=
+birlik manfiy zaryadni zanjir bo’ylab ko’chirishda bajarilgan ish.
++++++
+Agar anod zanjiridagi tok kuchi 2 mkA bo‘sa, katoddan 1 s da chiqayotgan elektronlar sonini toping. e=1,6•10<sup>-19</sup> Kl
+6,25.10
+4.10
+#1,25.10<sup>13</sup>
+1,25.10<sup>11</sup>
++++++
+To’g’ri chiziqli tekis tezlanuvchan harakarda tezlik vektorining…
+Moduli va yo’nalishi o’zgarmas saqlanadi.
+Moduli tekis kamayib yo’nalishi o’zgarmaydi.
+#Moduli tekis oshib yo’nalishi o’zgarmaydi.
+Moduli va yo’nalishi o’zgarib turadi.
++++++
+Tezlik deb nimaga aytiladi?
+#Jismni vaqt birligida bosib o’tgan masofasiga teng bo’lgan fizik kattalika aytiladi   
+ϑ ga aytiladi
+Jismni bosib o’tgan yo’lini vaqtga ko’paytmasi 
+a ga aytiladi.
++++++
+Vertolyot yuqoriga tekis ko'tarilmoqda. Vertolyot parragining chetki nuqtasi yer bilan bog'langan
+sanoq tizimiga nisbatan qanday traektoriya bo'ylab harakat qiladi?
+#vintsimon. 
+aylana.
+parabola.
+to'g'ri chiziq. 
++++++
+Quyidagi fikrlarning qaysi biri noto'g'ri?
+agar jism biror sanoq sistemaga nisbatan tinch turgan bo‘lsa, uning bu sistemaga nisbatan , ϑ tezligi nolga teng bo'ladi.
+#harakatlanish vaqtini topish uchun o'rtacha tezlikni bosib o'tilgan yo'lga bo'lish kerak.
+tekis harakatda tezlikning son qiymati o'zgarmas kattalikdir.
+yo'l harakat traektoriyasining uzunligiga teng skalyar kattalikdir.
++++++
+Mexanik  harakat deb nimaga aytiladi?
+#Jismlarning fazodagi vaziyatini vaqt o‘tishi bilan bir-biriga nisbatan o‘zgarishiga aytiladi.
+Sistemani tashkil qilgan jismlarning o‘zaro harakatiga aytiladi.
+Jismning holatini har qanday o‘zgarishiga aytiladi.
+Jismning ilgarilanma harakatiga aytiladi.
++++++
+Agar vadorod gazining idishdagi zichligi 0,09 kg/m<sup>3</sup> ga teng bo‘lsa, molekulalar konsentratsiyasini toping (m<sup>-3</sup>) N<sub>A</sub> = 6·10<sup>23</sup>mol-1
+#27·10<sup>24</sup>
+6·10<sup>20</sup>
+6·10<sup>23</sup>
+6·10<sup>25</sup>
++++++
+Tok kuchi 400 mA bo‘lganda, o‘tkazgichning ko‘ndalang kesimi orqali 1 ms vaqt ichida o‘tadigan elektronlar sonini toping. e=1,6 .10<sup>-19</sup> Kl.
+#2,5 .10<sup>15</sup>
+5.10<sup>17</sup>
+6.10<sup>15</sup>
+10
++++++
+Metal o‘tkazgichdagi tok kuchi 3.2mA. O‘tkazgichning ko‘ndalang kesim yuzasidan 1s da nechta elektron o‘tadi? Elektron zaryadi e=1,6•10<sup>-19</sup> Kl.
+#2 .10<sup>16</sup>
+9,14 .10<sup>23</sup>
+6,25 .10<sup>20</sup>
+10<sup> 23</sup>
++++++
+Potensiallar farqi 1600 V bo‘lgan elektr maydonning ikki nuqtasi orasiga 5·10<sup>-6</sup>C zaryad joylshtirilganda bajarilgan ish qanchaga teng.
+32 ·10<sup>9</sup>J
+80 ·10<sup>2</sup>
+#8 ·10<sup>-3</sup>J
+11 J
++++++
+Bug’lanishga teskari jarayon qaysi javobda berilgan 
+Rekombinatsiya
+#kondensatsiya
+Korroziya
+sublimatsiya
++++++
+10 kV kuchlanishda ishlayotgan rengen trubkasining anodiga elktronlar qanday tezlik bilan yetib boradi (Mm/s)? ,e=1,6•10<sup>-19</sup>C, m=9.1•10<sup>-31</sup>kg
+100
+110
+#59,3
+130
++++++
+Bosim va temperatura o’rtacha erkin yugurish yo’liga qanday ta’sir etadi
+#Temperatura ortishi va bosim kamayishi bilan erkin yugurish yo’li ortadi
+Temperatura ortib, bosim o’zgarmas bo’lganda erkin yugurish yo’li ortadi 
+Bosim  ortib , temperatura  o’zgarmas bo’lganda erkin yugurish yo’li  kamayadi 
+Temperatura va bosim ortishi bilan erkin yugurish yo’li o’zgarmaydi 
++++++
+25 m/s tezlikda sekinlab ketayotgan “Damas” tezlanishi 2,5 m/s<sup>2</sup> bo‘lganda 10 sekunddan qancha masofa bosib o‘tadi?
+40 m
+4000 m
+100 m
+#125 m
++++++
+Faqat qaytmas jarayonlar ko‘rsatilgan  javobni ko‘rsating.
+ichki ishqalanish, issiqlik o‘tkazuvchanlik va adiabatik jarayon
+diffuziya, issiqlik o‘tkazuvchanlik va izotermik jarayon
+diffuziya, ichki ishqalanish va izobarik jarayon
+#diffuziya, ichki ishqalanish, issiqlik o‘tkazuvchanlik 
++++++
+Kislorodning molekulyar massasi qanchaga teng?
+#32 g/mol	    
+16 g/mol	
+20 g/mol           
+15 g/mol
++++++
+Normal sharoitda vadorod gazining zichligini hisoblang:
+#0,09 kg/m3	
+0,9 kg/m3	
+0,2 g/m3	
+2 kg/m3
++++++
+Normal sharoitda og‘zi berk idish bir xil massali vodorod, azot va kislorod  gazlari bilan to‘ldirilgan. Qaysi gazning parsial bosimi kichik?
+Vodorod      
+#Kislorod         
+Azot
+Javob idishning hajmiga bog‘liq
++++++
+20 g/sm<sup>3</sup> necha kg/m<sup>3</sup> ga teng.
+20
+200
+2000
+#20000
++++++
+Kuchli magnitlanish xususiyatiga ega bo’lgan moddalarga …….deyiladi. Nuqtalar o’rniga to’g’risini qo’ying.
+Diamagnit    	
+paramagnitlar     
+#Ferromagnitlar     	
+Domenlar
++++++
+Nuqtalar o’rniga kerakli so’zni qo’ying: “ Jismga ta’sir etuvchi kuch bo’lmaganda uning tinchlikdagi yoki harakatdagi o’z holatini saqlash xossasi ................. deyiladi”.#inertlikmassakilogrammtonna
++++++
+Jismga ta ’sir qiiayotgan hamma kuchiarning vektor yig'indisi  nolga teng bo'lsa, jism qanday harakat qiladi? 
+tezligi ortib boradi.
+aylana bo'ylab doimiy tezlik bilan.
+#to'g'ri chiziq bo'ylab doimiy tezlik bilan.
+tezligi kamayib boradi.
++++++
+Aylana bo'ylab tekis harakatda chizig'liy tezlik vektorining ... 
+#moduli o'zgarmas bo'lib, yo'nalishi uzluksiz o'zgarib turadi.
+moduli tekis oshib, yo'nalishi o'zgarmas qoladi.
+moduli tekis kamayib, yo'nalishi o'zgarmaydi.
+moduli va yo'nalishi uzluksiz o'zgarib turadi.
++++++
+Aylana bo'ylab tekis harakatda tezlanish vektori
+#moduli o'zgarmas bo'lib, yo'nalishi uzluksiz o'zgarib turadi. 
+nolga teng. 
+moduli va yo'nalish o' zgarmaydi.
+moduli va yo'nalishi o'zgarib turadi.
++++++
+Agar jismga faqat markazga intilma kuch ta’sir etsa, u qanday harakatda bo'ladi?
+to'g'ri chiziqii tekis harakatda.
+to'g'ri chiziqii tekis tezlanuvchan harakatda.
+#aylana bo'ylab tekis harakatda.
+to'g'ri chiziqii tekis sekinlanuvchan harakatda.
++++++
+Quyoshdan Yerga energiya qaysi usulda uzatiladi? 
+konveksiya.
+# nurlanish.
+issiqlik. o'tkazuvchanlik.
+konveksiya va issiqlik o'tkazuvchanlik.
++++++
+Agar inersial sanoq  tizimiga nisbatan harakatdagi jismga ta ’sir etuvchi kuchlarning vektor yig'indisi
+nolga teng bo'lsa, jismning harak at traektoriyasi qanday bo'ladi?
+parabola.
+nuqta
+#to'g'ri chiziq. 
+aylana.
++++++
+Biror balandlikdan gorizontal otilgan jism qanday traktoriya bo'ylab harakatlanadi? Havoning qarshiligini hisobga olmang. 
+giperbola bo'ylab.
+to'g'ri chiziq bo'ylab.
+#tarmog'i pastga yo'nalgan parabola bo'ylab.
+tarmog'i yuqoriga yo'nalgan parabola bo'ylab.
++++++
+Tosh yuqoriga  vertikal otildi. Tosh traektoriyaning qaysi nuqtalarida eng katta tezlanishga ega bo ladi? Havoning qarshiligi hisobga olinmasin.
+traektoriyaning eng yuqori nuqtasida.
+#tezlanish hamma joyda birday va g ga teng.
+traektoriyaning eng quyi nuqtasida.
+traektoriyanlng o'rtasida.
++++++
+Nyutonning 2-qonuniga berilgan to'g'ri ta’rifni ko'rsating.
+jismning tezlanishi unga ta’sir etuvchi  kuchga mutanosibdir.
+jismga ta’sir etuvchi kuch jism massasiga to'g'ri mutanosib va mutanosiblik koeffitsienti tezlanishdir.
+jismga ta’sir etuvchi har qanday kuch shu jism massasi bilan to'la tezlanishining ko‘paytmasiga teng.
+#jism olgan tezlanish unga ta’sir etuvchi natijaviy kuch yo'nalishida bo'lib, moduli kuchning moduliga to'g'ri va jism massasiga teskari mutanosibdir.
++++++
+Elektr yurituvchi kuch=
+#birlik musbat zaryadni zanjir bo’ylab ko’chirishda elektr kuchlarning bajargan ishi.=
+birlik musbat zaryadni zanjir bo’ylab ko’chirishda bajarilgan ish.=
+birlik musbat zaryadni zanjir bo’ylab ko’chirishda begona kuchlanishning bajargan ishi.=
+birlik manfiy zaryadni zanjir bo’ylab ko’chirishda bajarilgan ish. 
++++++
+Agar xar qaysi to‘lqinning amplitudasi 5A ga teng bo‘lib, nuqtaga bir xil fazada kelsa, natijaviy amplituda nimaga teng bo‘ladi?
+#10A
+2A
+0
+1
++++++
+Elektromagnit to‘lqinning   E va H   vektorlari:
+O‘zaro perpendikulyar va to‘lqinning tarqalish yo‘nalishiga tik bo‘lgan tekislikda yotadilar;
+#O‘zaro perpendikulyar va to‘lqinning tarqalish yo‘nalishiga parallel bo‘lgan tekislikda yotadilar;
+O‘zaro parallel va to‘lqinning tarqalish yo‘nalishiga tik bo‘lgan tekislikda yotadilar;
+O‘zaro parallel va to‘lqinning tarqalish yo‘nalishiga parallel bo‘lgan tekislikda yotadilar.
++++++
+Nuqta x o‘qi bo‘ylab x=0,059cos(100πt+π), m qonun bo‘yicha tebranmoqda. Tebranishning maksimal tezligini toping.
+# 5,9π
+π
+0,06π
+1
++++++
+Nuqta x o‘qi bo‘ylab x=0,1cos(20πt+π), m qonun bo‘yicha tebranmoqda. Tebranishning maksimal tezlanishini toping.
+40
+#400
+4000
+4
++++++
+Nuqta x o‘qi bo‘ylab x=0,07cos(6πt+π), m qonun bo‘yicha tebranmoqda. Tebranishning chastotasini  toping.(Hz)
+# 3
+6π 
+6 
+1.
++++++
+Massasi m bo'lgan jism gorizontal tekislikda tinch turibdi. Bu holatda jism hosil qiladigan bosim
+kuchi bilan tayanch reaksiyasi kuchining modul jihatdan tengligi quyida sanab o'tilgan qonunlarning qaysi biri asosida tushuntiriladi?
+Nyutonning 1-qonuni.
+Nyutonning 2-qonuni. 
+#Nyutonning 3-qonuni.
+impulsning saqlanish qonuni.
++++++
+Quyidagi kuchlarning qaysi biri gravitatsiya tabiatiga ega? 
+elastiklik kuchi.
+jism vazni
+Arximed kuchi.
+#og'irlik kuchi.
++++++
+Temperaturasi -73°C  bo’lgan bir atomli bir mol ideal gazning ichki energiyasini (J) aniqlang.
+1246.      
+1662      
+2077.      
+#2493
++++++
+«Neksiya» avtomobili 1 soatda 72 km masofani bosib o’tgan. Avtomobil tezligini (m/s) toping. 
+#20;          
+2;          
+200;      
+2000.
++++++
+1,38•10<sup>-23</sup> J/K-bu qaysi doimiy?
+#Bolsman
+Avagodro
+Universal gaz
+Modda miqdori
++++++
+Agar anod zanjiridagi tok kuchi 2 mA bo‘sa, katoddan 1 s da chiqayotgan elektronlar sonini toping. e=1,6 .10<sup>-19</sup> Kl
+#12,5.10<sup>15</sup>
+4.10<sup>14</sup>
+5.10<sup>15</sup>
+6,6.10<sup>10</sup>
++++++
+Elektr lampa zanjiridagi tok kuchi 2,56 A ga teng. Uning spiralining ko‘ndalang kesimi orqali 5 minutda nechta elektron o‘tadi? e=1,6•10<sup>-19</sup> Kl.
+2,5.10<sup>20</sup>
+2,4.10<sup>21</sup>
+2,4.10<sup>20</sup>
+#4,8.10<sup>21</sup>
++++++
+Traektoriya   nima?
+#Moddiy nuqtaning harakati  davomida fazoda qoldirgan izi.  
+Ikki nuqta orasidagi  masofa .       
+Koordinatalar boshidan o’tuvchi to’g’ri  chiziq 
+Traektoriyaning  boshlang’ich va oxirgi nuqtalarini  tutashtiruvchi  kesma
++++++
+10<sup>5</sup> Pa bosim ostida bo‘lgan gazning hajmi izobarik ravishda 300 sm<sup>3</sup> dan 400 sm<sup>3</sup> gacha oshdi. Gazning kengayishida bajaradigan ishi (J) aniqlansin
+#10
+50.
+30.
+20.
++++++
+Quyida bayon qilingan fikrlarning qaysi biri noto'g'ri?
+tutash idish tirsaklaridagi suyuqliklar sathlarining farqi suyuqliklar zichligiga bog'liq bo'ladi.
+agar tutash idishning har ikki tirsagiga quyilgan suyuqliklarning zichliklari teng bo’lsa,
+ularning sathlari ham teng bo'ladi.
+#agar tutash idish tirsaklariga zichliklari teng bo‘lmagan suyuqliklar quyilsa, turli tirsaklardagi suyuqlik ustunlari hosil qiladigan bosimlar ham teng bo'lmaydi.
+Torrichelli tajribasi - atmosfera bosimini aniqlash usulidir
++++++
+Suv to'ldirilgan chelak quduqdan ko'tarilmoqcla. Qaysi holda chelakni ushlab turish yengilroq bo'ladi? 
+# chelak suvga to'la cho'kib turganda.
+chelakning yarmi suvga cho'kib turgan holda.
+chelak suvga cho'kmagan holda.
+chelakning chorak qisim suvga cho'kib turganda.
++++++
+Qoidani to'liq ifodalang: aylanish o'qiga ega bo'lgan jism muvozanatda bo'lishi uchun jismga ta’sir qiluvchi ...
+#chapga aylantiruvchi kuch momentlarining yig'indisi o'ngga aylantiruvchi kuch momentlarining yig'indisiga teng ...
+kuch momentlarining yig'indisi noldan farqli ...
+kuchlarning geometrik yig'indisi nolga teng ...
+kuchlarning algebraik yig'indisi noldan farqli ...
++++++
+Gaz izotermik kengayganda uning ichki energiyasi qanday o’zgaradi?
+oshadi	
+#o’zgarmaydi.	
+kamayadi	
+tjy
++++++
+Bir xil kuch ta’sirida harakatlanayotgan uchta jismning tezlanishlari a <sub>1</sub>&gt;a <sub>2</sub>&gt;a <sub>3</sub> munosabatda bo‘lsa, ularning qaysi biri eng inert?
+barchasi bir xil.
+birinchisi
+ikkinchisi.
+#uchinchisi.
++++++
+Butun olam tortishish qonunidagi gravitatsion doimiyning ma’nosini tushuntiring.
+#massalari 1 kg dan va oralaridagi masofa 1.0 m bo'lgan ikki jism orasidagi tortishish kuchiga teng kattalik.
+massalari 1 kg dan bo'lgan ikkita jismning og'irlik kuchiari yig' indisiga teng kattalik.
+massalari 1 kg dan va orafaridagi masofa 1k m bo'lgan ikki jism orasidagi tortishish kuchiga teng kattalik.
+massalari 10 kg dan 

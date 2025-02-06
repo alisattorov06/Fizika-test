@@ -1,2 +1,0 @@
-# Fizika-test
-Test
